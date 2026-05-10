@@ -1,0 +1,51 @@
+/**
+ * Wrangler config for beauticslab-mcp.
+ * Reference: docs/DESIGN.md §6.2, 부록 C (cloudflare/ai demo wrangler.jsonc).
+ *
+ * Secrets to set (do NOT commit):
+ *   wrangler secret put ASSERTION_VERIFY_KEY     # Next.js와 공유하는 HMAC 키 (assertion JWT 검증)
+ *   wrangler secret put INTERNAL_HMAC_KEY        # Worker → Next.js HMAC 서명 키
+ *   wrangler secret put NEXTJS_INTERNAL_BASE_URL # https://beauticslab.com
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "beauticslab-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "mcp.beauticslab.com/*", "zone_name": "beauticslab.com" }
+  ],
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["BeauticsLabMCP"]
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "BeauticsLabMCP",
+        "name": "MCP_OBJECT"
+      }
+    ]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "c50a2e2a757349c3b380e7699b35f911",
+      "preview_id": "a7892602c0ad440ab11fd0898898cf48"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "dev": {
+    "port": 8791,
+    "ip": "0.0.0.0",
+    // routes 설정의 host(mcp.beauticslab.com)를 wrangler dev가 request.url에 자동 inject하는 동작 회피.
+    // 참조: https://github.com/cloudflare/workers-sdk/issues/3635 — routes 패턴에서 hostname 추론하는 게 dev에서 의도된 동작.
+    // dev.host="localhost"로 강제해야 PRM/audience/WWW-Authenticate 모두 일관되게 localhost:8791로 서빙됨.
+    "host": "localhost:8791"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "beauticslab-mcp",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Remote MCP server for beauticslab.com (Cloudflare Worker, OAuth 2.1)",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^0.5.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "agents": "^0.12.3",
+    "jose": "^6.2.3",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260402.1",
+    "typescript": "^6.0.2",
+    "wrangler": "^4.79.0"
+  }
+}
