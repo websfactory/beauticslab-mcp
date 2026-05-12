@@ -7,3 +7,10 @@ dist/
 *.log
 .DS_Store
 worker-configuration.d.ts
+
+# 내부 데모 시나리오 노트 (public 노출 불필요)
+tests/scenario*.md
+tests/scenario*.txt
+
+# 데모용 원본 mp4 (GitHub user-attachments CDN 사용, repo blob 회피)
+tests/*.mp4

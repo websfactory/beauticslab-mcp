@@ -111,6 +111,36 @@
 
 ---
 
+## Step 6 결정 (사용자용 README + 클라이언트 가이드, 2026-05-12)
+
+근거 핸드오프: `handoffs/done/2026-05/2026-05-12-step6-readme-prep.md`(질문 리스트) + `handoffs/2026-05-12-step6-readme-done.md`(확정 + 산출물)
+
+| ID | 결정 | 상태 |
+|---|---|---|
+| S1 | README 언어: 한국어 우선 단일 파일. 영문(`README_en.md`)은 한국어 베타 안정화 후 작성 | active |
+| S2 | 브랜드 메인 표기: **BeauticsLab** (영문). beauticslab(소문자)/뷰틱스랩 한글은 부수 표기 | active |
+| S3 | 라이선스: Proprietary, All rights reserved. 외부 PR 받지 않음. 향후 변경 가능 | active |
+| S4 | 사용자 가이드 구성: README 단일 파일에 클라이언트 7종 평탄 나열. `docs/clients.md` 분리 안 함 | active |
+| S5 | 지원 채널: beauticslab.com 카카오톡 문의로 단일화. 별도 이메일/이슈 트래커 만들지 않음 | active |
+| S6 | 프라이버시: README엔 BeauticsLab 본사이트 개인정보처리방침 링크만. 별도 정책 문서 두지 않음 | active |
+| S7 | FAQ 필수 항목: (a) 게시글/루틴 외부 유출 여부, (b) 지원 클라이언트 목록 | active |
+| S8 | 클라이언트 가이드 구조: "비서/개발자" 카테고리 분리 폐기 → 클라이언트(툴) 단위 평탄 나열, 모두 동일 템플릿(사전조건→단계→config 예시→출처) | active |
+
+### Step 6 검증 결과 (curl + Claude Code .mcp.json)
+- 서버 메타데이터 조회: PRM/AS 정상, RFC 9728 WWW-Authenticate 준수
+- DCR 양쪽 패턴(`token_endpoint_auth_method=none` public / 기본 confidential) 모두 정상
+- CORS: `https://claude.ai` origin preflight 204
+- 풀 E2E (Claude Code attach → OAuth → tools/list → tools/call): search_product 5건 + get_my_routine 6 루틴 정상 반환
+
+상세: `research/clients-2026-05-12.md`
+
+### 발견된 환경 한계 (영향 범위 = 본 프로젝트 외)
+- ubuntu-dev 위 Claude Code로 dogfooding 시 OAuth callback이 headless라 수동 URL 복사 필요
+- 일반 사용자(데스크탑 클라이언트)에겐 해당 없음
+- 메모리 reference 별도 보관: `ref_claude_code_remote_mcp_oauth.md`
+
+---
+
 ## 추가 규칙
 
 - 새 결정은 출처 문서(DESIGN, tools-spec, nextjs-integration 등)에서 합의·근거 작성 → 본 표에 ID + 포인터로 등록
