@@ -1,54 +1,61 @@
 # BeauticsLab MCP
 
-[BeauticsLab](https://beauticslab.com)의 화장품/스킨케어 데이터와 내 루틴을, 내가 쓰는 AI 도구(Claude, ChatGPT, Cursor 등)에서 직접 불러올 수 있게 해 주는 원격 MCP 서버.
+**"내 루틴에 자극 성분 있어?" Claude한테 물어보세요.**
 
-[English](./README_en.md) · 조사일 기준: 2026-05-12
+올리브영·다이소·이커머스(네이버, 쿠팡, 11번가 등) 카탈로그와 BeauticsLab에 등록한 내 루틴을, 내가 쓰는 AI 안에서 그대로 분석합니다. 제품 검색, 루틴 조회, 전성분 분석까지.
+
+서비스: [beauticslab.com](https://beauticslab.com) · [English](./README_en.md)
 
 ![BeauticsLab MCP demo](./docs/demo.gif)
 
-> Claude Desktop에서 BeauticsLab MCP 호출: 비타민C 세럼 추천 → 내 루틴과 겹치는지 확인까지 40초. ([고화질 영상](https://github.com/user-attachments/assets/70f9f9ac-2a72-466c-9c19-9f5e7a3576a1))
+> Claude Desktop에서 BeauticsLab MCP 호출: 비타민C 세럼 추천부터 내 루틴과 겹치는지 확인까지 40초. ([고화질 영상](https://github.com/user-attachments/assets/70f9f9ac-2a72-466c-9c19-9f5e7a3576a1))
 
 ---
 
 ## 한눈에
 
-- **Endpoint**: `https://mcp.beauticslab.com/mcp`
-- **연결 방식**: 각 AI 도구의 "Custom Connector / MCP Server 추가" UI에 위 URL 입력 → BeauticsLab 계정으로 로그인 → 권한 허용
-- **계정**: [beauticslab.com](https://beauticslab.com) Google/Kakao 로그인 계정
+- **서버 주소**: `https://mcp.beauticslab.com/mcp`
+- **연결**: AI 도구의 "Custom Connector / MCP Server 추가"에 위 주소 입력 → BeauticsLab 계정 로그인 → 권한 허용
+- **계정**: beauticslab.com Google / Kakao 로그인 계정 그대로
 - **상태**: 베타 (무료)
 
 ---
 
 ## 무엇을 할 수 있나
 
-자기 AI에서 자연어로 호출하면 됩니다.
+내가 쓰는 AI한테 그냥 말 걸면 됩니다.
 
-- "수분 크림 추천해줘" → 올리브영·에누리·다이소 및 BeauticsLab 검증 카탈로그에서 검색
-- "내 루틴 보여줘" → BeauticsLab에 저장해 둔 본인 스킨케어 루틴 조회
-- 이후 AI가 위 결과를 바탕으로 비교·추천·답변 생성
+- 🔍 **"건성인데 알코올 없는 토너 추천해줘"** → 올리브영·다이소·이커머스(네이버, 쿠팡, 11번가 등) + BeauticsLab 검증 카탈로그에서 검색
+- 📋 **"내 저녁 루틴 보여줘"** → BeauticsLab에 저장한 내 스킨케어 루틴 조회
+- 🧪 **"닥터디퍼런트 비타리프트 전성분에 자극 성분 있어?"** → 전성분(국문/영문) + EWG 등급 조회
 
-> 읽기 전용입니다. 데이터 수정/생성 도구는 없습니다.
+AI가 위 결과를 받아서 비교·추천·답변까지 한 번에 만들어 줍니다.
+
+> 읽기만 합니다. 데이터를 바꾸거나 새로 만들지 않습니다.
 
 ---
 
-## 노출되는 도구
+## 쓸 수 있는 도구
 
 | 도구 | 설명 |
 |---|---|
-| 제품 검색 | 키워드로 화장품/스킨케어 제품 검색 (한국어 권장) |
-| 내 루틴 조회 | 본인 BeauticsLab 계정의 루틴 리스트 + 제품 + (선택) 성분 |
+| `search_product` | 키워드로 제품 검색 (한국어 권장). 올리브영, 다이소, 이커머스(네이버·쿠팡·11번가 등), 검증 커스텀 4개 소스 |
+| `get_my_routine` | 내 BeauticsLab 계정의 루틴 + 들어있는 제품 + (선택) 핵심 성분 요약 |
+| `get_product_ingredients` | 한 제품의 전성분 + EWG 등급. 앞 두 도구가 돌려준 `goodsNo`를 그대로 넘기면 됩니다 |
 
-다른 사용자 데이터는 조회할 수 없습니다. 본인 계정 범위로만 작동합니다.
+검색이나 루틴 조회로 제품을 찾고, 그 중 궁금한 제품의 전성분을 `get_product_ingredients`로 파고드는 흐름입니다.
+
+남의 데이터는 못 봅니다. 내 계정 안에서만 동작합니다.
 
 ---
 
 ## 연결하기
 
-도구별 단계가 다릅니다. 자기가 쓰는 도구의 섹션만 보면 됩니다.
+AI 도구마다 연결 방법이 다릅니다. 본인이 쓰는 도구 섹션만 읽으면 됩니다.
+
+> 아래 가이드는 2026-05-13 기준. 각 AI 도구의 UI 위치나 메뉴명은 바뀔 수 있습니다.
 
 ### Claude Desktop · claude.ai
-
-지원 플랜: Free / Pro / Max / Team / Enterprise (Free는 custom connector 1개 제한, 베타)
 
 **Claude Desktop**
 1. `Settings → Connectors` 진입
@@ -73,7 +80,7 @@
 
 ### ChatGPT
 
-지원 플랜: Plus / Pro / Business / Enterprise / Edu (2025-11-13~). "Connectors"는 2025-12-17부터 공식적으로 **"Apps"**로 표기됩니다.
+> ChatGPT는 2025-12-17부터 "Connectors"를 공식적으로 **"Apps"**로 표기합니다.
 
 1. `Settings → Apps & Connectors → Advanced settings → Developer Mode` 토글 ON
 2. `Settings → Apps & Connectors → Create`
@@ -133,8 +140,6 @@ UI에서 추가하려면 `Cursor Settings → Tools & MCP → New MCP Server`.
   }
 }
 ```
-
-> 참고: VS Code MCP 클라이언트의 OAuth 자동 흐름은 공식 문서가 아직 빈약합니다. OAuth 처리가 자동으로 트리거되지 않으면 [Cline 확장](#cline-vs-code-확장)을 대안으로 권장합니다.
 
 출처: [VS Code: MCP configuration reference](https://code.visualstudio.com/docs/copilot/reference/mcp-configuration)
 
@@ -217,29 +222,23 @@ Endpoint만 알면 됩니다: `https://mcp.beauticslab.com/mcp`
 
 ## FAQ
 
-**Q. 내 게시글이나 루틴이 외부로 유출되나요?**
-아니오. 본인 계정으로 인증한 AI 세션에서만 본인 데이터에 접근합니다. 다른 사용자의 데이터는 조회할 수 없습니다. 응답은 사용자가 사용 중인 AI 클라이언트에만 전달됩니다.
+**Q. 내 루틴이 외부로 유출되나요?**
+아니오. 내가 로그인한 AI 세션에서만 내 데이터에 접근합니다. 응답은 그 AI 클라이언트로만 갑니다. 남의 데이터는 못 봅니다.
 
 **Q. 어떤 AI 도구가 지원되나요?**
-검증된 도구: Claude Desktop, claude.ai, ChatGPT, Cursor, Cline, Zed, VS Code(Copilot Chat). 그 외에도 MCP 2025-11-25 표준의 Streamable HTTP + OAuth 2.1을 지원하는 모든 클라이언트가 호환됩니다.
+검증된 도구는 Claude Desktop, claude.ai, ChatGPT, Cursor, Cline, Zed, VS Code(Copilot Chat). 그 외에도 MCP 표준(Streamable HTTP + OAuth 2.1, 2025-11-25)을 지원하는 클라이언트면 다 됩니다.
 
 **Q. 데이터 출처는 어디인가요?**
-올리브영, 에누리, 다이소 등 공개 카탈로그와 BeauticsLab에서 검증한 커스텀 제품입니다.
+올리브영, 다이소, 이커머스(네이버·쿠팡·11번가 등) 공개 카탈로그와 BeauticsLab에서 검증한 커스텀 제품입니다.
 
 **Q. 한국어/영어 어느 쪽이 잘 검색되나요?**
-한국어 쿼리를 권장합니다. 영어 쿼리도 가능하지만 검색 정확도가 떨어질 수 있습니다.
+한국어가 잘 잡힙니다. 영어도 되긴 하는데 정확도가 떨어집니다.
 
-**Q. 연결을 끊거나 권한을 회수하려면?**
-사용 중인 AI 클라이언트의 Connectors/MCP 설정에서 BeauticsLab 항목을 제거하면 됩니다. 토큰은 클라이언트 쪽에 보관되며 만료 시 자동 폐기됩니다.
+**Q. 연결 끊거나 권한 회수하려면?**
+쓰던 AI 도구의 Connectors / MCP 설정에서 BeauticsLab 항목을 지우면 됩니다. 토큰은 클라이언트에 보관되고 만료되면 자동 폐기됩니다.
 
 **Q. 사용량 제한이 있나요?**
-베타 단계이므로 SLA를 보장하지 않습니다. 비정상적 트래픽 패턴은 차단될 수 있습니다.
-
----
-
-## 프라이버시
-
-데이터 수집·보관·삭제 및 제3자 공유 방침은 BeauticsLab 본사이트의 [개인정보처리방침](https://beauticslab.com/privacy)을 따릅니다.
+베타라 SLA는 없습니다. 비정상 트래픽 패턴은 차단될 수 있습니다.
 
 ---
 
@@ -252,5 +251,3 @@ Endpoint만 알면 됩니다: `https://mcp.beauticslab.com/mcp`
 ## 라이선스
 
 Proprietary. All rights reserved. © BeauticsLab.
-
-외부 기여(Pull Request)는 현재 받지 않습니다. 이슈 리포트는 위 지원 채널로 전달해 주세요.
