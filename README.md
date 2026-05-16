@@ -8,7 +8,7 @@
 
 ![BeauticsLab MCP demo](./docs/demo.gif)
 
-> Claude Desktop에서 BeauticsLab MCP 호출: 비타민C 세럼 추천부터 내 루틴과 겹치는지 확인까지 40초. ([고화질 영상](https://github.com/user-attachments/assets/70f9f9ac-2a72-466c-9c19-9f5e7a3576a1))
+> Claude Code에서 비타민C 세럼 추천 → 내 루틴 조회 → 겹치는 제품 확인까지 한 대화로. ([고화질 영상](https://github.com/user-attachments/assets/70f9f9ac-2a72-466c-9c19-9f5e7a3576a1))
 
 ---
 
@@ -75,6 +75,33 @@ AI 도구마다 연결 방법이 다릅니다. 본인이 쓰는 도구 섹션만
 > Advanced settings의 Client ID/Secret 필드는 **비워 두세요**. 서버가 동적 클라이언트 등록(DCR)을 처리합니다.
 
 출처: [Anthropic: Custom connectors with remote MCP](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)
+
+---
+
+### Claude Code (CLI)
+
+CLI 한 줄로 등록:
+
+```bash
+claude mcp add --transport http beauticslab https://mcp.beauticslab.com/mcp
+```
+
+또는 프로젝트 루트의 `.mcp.json`을 직접 편집:
+
+```json
+{
+  "mcpServers": {
+    "beauticslab": {
+      "type": "http",
+      "url": "https://mcp.beauticslab.com/mcp"
+    }
+  }
+}
+```
+
+처음 호출 시 브라우저 OAuth 창이 열립니다. BeauticsLab 로그인 → "허용" → 이후 `claude mcp list`에서 `beauticslab ... ✓ Connected` 확인.
+
+출처: [Anthropic: Claude Code MCP](https://docs.claude.com/en/docs/claude-code/mcp)
 
 ---
 
