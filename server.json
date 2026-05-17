@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.beauticslab/mcp",
+  "title": "BeauticsLab",
+  "description": "Search Korean cosmetics (Olive Young, Daiso, Naver, Coupang) with EWG ingredient analysis.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/websfactory/beauticslab-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.beauticslab.com/mcp"
+    }
+  ]
+}

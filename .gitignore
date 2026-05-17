@@ -14,3 +14,6 @@ tests/scenario*.txt
 
 # 데모용 원본 mp4 (GitHub user-attachments CDN 사용, repo blob 회피)
 tests/*.mp4
+
+# MCP Registry DNS 인증용 ed25519 키페어 (key.pem 비밀키 보관, 외부 노출 금지)
+.mcp-registry/
