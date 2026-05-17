@@ -58,11 +58,12 @@ AI 도구마다 연결 방법이 다릅니다. 본인이 쓰는 도구 섹션만
 ### Claude Desktop · claude.ai
 
 **Claude Desktop**
-1. `Settings → Connectors` 진입
-2. 화면 하단 **"Add custom connector"** 클릭
-3. URL에 `https://mcp.beauticslab.com/mcp` 입력 후 Add
-4. 새 브라우저 창에서 BeauticsLab 로그인 → "허용" → Claude로 돌아옴
-5. 새 채팅에서 "내 BeauticsLab 루틴 보여줘" 시도
+1. `Settings → Connectors` (한글: `설정 → 커넥터`) 진입
+2. 화면 하단 **"커스텀 커넥터 추가"** (Add custom connector) 클릭
+3. **"원격 MCP 서버 URL"** 필드에 `https://mcp.beauticslab.com/mcp` 입력 후 추가
+4. 목록에 항목이 뜨면 **"연결"** 버튼 클릭 ("아직 beauticslab에 연결되지 않았습니다" 안내가 함께 보임)
+5. 새 브라우저 창에서 BeauticsLab 로그인(Google/Kakao) → "허용" → Claude로 돌아옴
+6. 새 채팅에서 "내 BeauticsLab 루틴 보여줘" 시도
 
 **claude.ai 웹 (Pro/Max)**
 1. `Customize → Connectors → +` (Add custom connector)
@@ -109,15 +110,19 @@ claude mcp add --transport http beauticslab https://mcp.beauticslab.com/mcp
 
 > ChatGPT는 2025-12-17부터 "Connectors"를 공식적으로 **"Apps"**로 표기합니다.
 
-1. `Settings → Apps & Connectors → Advanced settings → Developer Mode` 토글 ON
-2. `Settings → Apps & Connectors → Create`
-3. 입력값
-   - Name: `BeauticsLab`
-   - Connector URL: `https://mcp.beauticslab.com/mcp`
-4. 저장하면 OAuth 인증 페이지로 이동 → BeauticsLab 로그인 → 허용
-5. 새 대화에서 BeauticsLab 도구 호출
+전제: ChatGPT Plus 이상 + Developer Mode 노출 가능한 계정
 
-> ChatGPT는 등록 시 "OpenAI가 검증하지 않은 커스텀 MCP 서버" 경고 배너를 표시합니다. 정상입니다.
+1. `Settings → Apps → Advanced settings` (한글: `설정 → 앱 → 고급 설정`) 진입
+2. **"개발자 모드"** (Developer Mode) 토글 ON
+3. 뒤로 돌아가면 "고급 설정" 옆에 **"앱 만들기"** (Create app) 버튼 노출 → 클릭
+4. 입력값
+   - **MCP 서버 URL**: `https://mcp.beauticslab.com/mcp`
+   - **인증**: `OAuth` 선택
+5. **"만들기"** 클릭 → 새 브라우저 창에서 BeauticsLab 로그인(Google/Kakao) → "허용"
+6. **"뷰틱스랩이(가) 연결되었습니다"** 표시되면 완료
+7. 새 대화에서 BeauticsLab 도구 호출 (예: "내 BeauticsLab 루틴 보여줘")
+
+> ChatGPT는 등록 시 "OpenAI가 검증하지 않은 커스텀 MCP 서버" 경고 배너를 표시할 수 있습니다. 정상입니다.
 
 출처: [OpenAI: Connect from ChatGPT (Apps SDK)](https://developers.openai.com/apps-sdk/deploy/connect-chatgpt)
 
