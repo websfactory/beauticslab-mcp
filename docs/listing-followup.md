@@ -1,20 +1,42 @@
 # beauticslab-mcp 외부 디렉토리 등록 — 후속 작업
 
 작성: 2026-05-17
-상태: 자료 정리 완료, 실제 등록은 다음 세션
+업데이트: 2026-05-18 (Smithery 등재 완료 + Glama 자동 인덱싱 확인)
 선행: MCP Registry 등록 완료 (`com.beauticslab/mcp`), Claude Desktop + ChatGPT attach 검증 완료
 
 ## 진행 상태
 
 | 항목 | 상태 |
 |---|---|
-| MCP Registry (`com.beauticslab/mcp`) | 완료 (2026-05-17) |
+| MCP Registry (`com.beauticslab/mcp`) | 완료 (2026-05-17, v1.0.1 메타데이터 정정 2026-05-18) |
 | Claude Desktop attach | 검증 완료 (2026-05-17, README 한글 흐름 보강) |
 | ChatGPT attach | 검증 완료 (2026-05-17, README 한글 흐름 보강) |
-| Smithery (smithery.ai) | **미등록 — 다음 세션 진행** |
-| Glama (glama.ai) | **자동 인덱싱 확인 필요** |
+| Smithery (smithery.ai) | **완료 (2026-05-18)** — Public, Quality 84/100, Verification 5/6, [페이지](https://smithery.ai/servers/websfactoryinfo/beauticslab) |
+| Glama (glama.ai) | **자동 인덱싱 됨 (Registry 기반)** — [페이지](https://glama.ai/mcp/connectors/com.beauticslab/mcp). Status: Unhealthy (OAuth 401 false positive) |
 | Product Hunt | **미등록 — 자료 준비 후 런칭** |
 | mcp.so 등 기타 디렉토리 | 후순위 |
+
+## Smithery 등재 결과 (2026-05-18)
+
+- **URL**: https://smithery.ai/servers/websfactoryinfo/beauticslab
+- **Namespace**: websfactoryinfo (개인 namespace)
+- **Visibility**: Public (검색·카테고리 노출)
+- **Quality Score**: 84/100
+- **Verification**: 5/6 통과
+  - ✅ Successful release / ✅ Quality > 80 / ✅ Homepage / ✅ TXT record / ✅ Link to Smithery
+  - ⬜ Paid plan (무료 유지 결정, "Verified" 배지는 미발급)
+- **자동화 노트**:
+  - server-card.json (`/.well-known/mcp/server-card.json`)을 OAuth-blocked scanner 우회용으로 호스팅 → 도구 3개 자동 인식 성공
+  - 등록 폼 + Settings 입력은 openclaw `beauticslab` 프로필로 자동화 (visibility/icon 토글만 React 컴포넌트 제약으로 수동)
+- **TXT 인증값**: `smithery-verification=68e086e3e722a43f8dec04d63c60c008267a2901ceb7082a0d0dd4f15c618f37` (beauticslab.com apex)
+- **백링크**: README.md/README_en.md 양쪽 헤더 서비스 라인에 Smithery 링크 추가 (commit e377890)
+
+## Glama 자동 인덱싱 결과 (2026-05-18 확인)
+
+- MCP Registry 등록(2026-05-17) → Glama가 자동 크롤. 24~72시간 대기 불필요
+- 모든 메타데이터 Registry server.json 그대로 사용 (description, repo, transport)
+- ⚠️ Status: **Unhealthy** — OAuth 인증 필수 서버라 health check가 401을 실패로 해석. 일반적 함정. 실제 클라이언트 사용엔 무관
+- 개선 옵션: "Claim this connector" → 도메인 검증 (TXT 이미 존재) → 메타데이터 직접 통제. 우선순위 낮음
 
 ---
 
