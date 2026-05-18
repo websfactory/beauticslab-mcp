@@ -4,7 +4,7 @@
 
 BeauticsLab MCP brings Korean cosmetics catalogs (Olive Young, Daiso, and e-commerce listings on Naver, Coupang, 11st) together with the skincare routines you've saved on BeauticsLab, all inside the AI tool you already use. Search products, look up your routines, analyze full ingredient lists.
 
-Service: [beauticslab.com](https://beauticslab.com) · [한국어](./README.md)
+Service: [beauticslab.com](https://beauticslab.com) · [한국어](./README.md) · [Smithery](https://smithery.ai/servers/websfactoryinfo/beauticslab)
 
 ![BeauticsLab MCP demo](./docs/demo.gif)
 

@@ -7,6 +7,7 @@ import type { ExportedHandler } from "@cloudflare/workers-types";
 import type { OAuthHelpers, AuthRequest } from "@cloudflare/workers-oauth-provider";
 import type { Env, Props } from "../index.js";
 import { verifyAssertion } from "./assertion-verify.js";
+import { serveServerCard } from "../well-known.js";
 
 const STATE_TTL_SEC = 600; // 10분 — bridge 흐름 단일 사용
 const STATE_PREFIX = "mcp_state:";
@@ -135,6 +136,7 @@ export const defaultHandler: ExportedHandler<Env & { OAUTH_PROVIDER: OAuthHelper
     const url = new URL(request.url);
     if (url.pathname === "/authorize") return handleAuthorize(request, env);
     if (url.pathname === "/oauth/callback") return handleCallback(request, env);
+    if (url.pathname === "/.well-known/mcp/server-card.json") return serveServerCard();
     return new Response("Not Found", { status: 404 });
   },
 };

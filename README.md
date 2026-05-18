@@ -4,7 +4,7 @@
 
 올리브영·다이소·이커머스(네이버, 쿠팡, 11번가 등) 카탈로그와 BeauticsLab에 등록한 내 루틴을, 내가 쓰는 AI 안에서 그대로 분석합니다. 제품 검색, 루틴 조회, 전성분 분석까지.
 
-서비스: [beauticslab.com](https://beauticslab.com) · [English](./README_en.md)
+서비스: [beauticslab.com](https://beauticslab.com) · [English](./README_en.md) · [Smithery](https://smithery.ai/servers/websfactoryinfo/beauticslab)
 
 ![BeauticsLab MCP demo](./docs/demo.gif)
 
