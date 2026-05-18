@@ -71,41 +71,22 @@
 
 ---
 
-## 1. Smithery (smithery.ai)
+## 1. Smithery (smithery.ai) — ✅ 완료
 
-### 등록 절차 (다음 세션에 사용자가 직접 진행)
+상세는 위 "Smithery 등재 결과" 섹션 참조. 추가 액션 없음.
 
-1. smithery.ai 가입 + 로그인
-2. "Add a server" / "New server" 메뉴 → 등록 양식
-3. 입력값 (위 공통 자료에서 가져가기)
-   - Name: `BeauticsLab`
-   - URL: `https://mcp.beauticslab.com/mcp`
-   - Description: 영문 Description 사용
-   - Category: Beauty / Lifestyle (Smithery 카테고리 옵션에 맞춰 선택)
-   - Tags: 위 태그 목록
-   - Tools: 도구 3개 이름 + 설명 입력 (필드가 있다면)
-4. 제출 → Smithery 측 검수 (자동/수동 여부 확인)
-5. 등록되면 README "검증된 도구" 섹션에 Smithery 링크 추가
-
-### 참고
-
-- Smithery는 MCP Registry와 별개 디렉토리. 등록 양식은 수동
-- DCR 사용 명시 (Client ID/Secret 비워두기 안내 필드가 있다면 그대로)
+남은 옵션 (선택):
+- Paid plan 전환 시 "Verified" 배지 (현재 5/6, paid plan만 미충족)
+- 도구 호출량 확보 → Performance/Usage 탭에 데이터 누적
 
 ---
 
-## 2. Glama (glama.ai)
+## 2. Glama (glama.ai) — ✅ 자동 인덱싱됨
 
-### 확인 절차
+상세는 위 "Glama 자동 인덱싱 결과" 섹션 참조.
 
-1. WebFetch로 `https://glama.ai/mcp/servers` 또는 검색 페이지에서 "beauticslab" 조회
-2. 미인덱싱이면 24~72시간 대기 후 재확인 (Glama는 MCP Registry 자동 크롤링이라고 알려짐)
-3. 일정 시간 후에도 미인덱싱이면 Glama 측에 수동 등록 폼이 있는지 확인
-
-### 등록 후
-
-- README "검증된 도구" 섹션에 Glama 링크 추가
-- Glama 페이지의 README/메타데이터가 GitHub README를 가져오는지 확인
+남은 옵션 (선택):
+- "Claim this connector" → 도메인 검증 (TXT 기존 사용) → 메타데이터 직접 통제
 
 ---
 
@@ -145,11 +126,14 @@ MCP 등록 디렉토리가 아니라 일반 제품 런칭 플랫폼. 더 큰 마
 
 ---
 
-## 다음 세션 시작 시 진행 순서
+## 다음 세션 시작 시 진행 순서 (2026-05-18 갱신)
 
-1. 이 문서 첫 줄부터 읽어서 상태 파악
-2. **Smithery 등록** (사용자가 smithery.ai에서 직접, 위 공통 자료 복붙)
-3. **Glama 인덱싱 확인** (Claude가 WebFetch로 조회)
-4. **Product Hunt 자료 준비 시작** (가장 시간이 많이 드는 작업, 분리 진행)
+Smithery + Glama 완료. 남은 선택지:
 
-각 등록 완료 후 README "검증된 도구" 섹션에 링크 누적 추가.
+1. **Product Hunt 자료 준비** (자산 큰 작업, 분리 진행) — 위 §3 체크리스트
+2. **mcp.so / awesome-mcp-servers PR / 기타 디렉토리** (후순위, §4)
+3. **트래픽 모니터링** — Smithery Performance/Usage 탭, Glama claim 여부 결정
+4. **Smithery Verified 배지** (Paid plan 전환 검토 — 5/6 → 6/6)
+
+별도 항목:
+- README "검증된 도구" 섹션에 Smithery/Glama 링크 누적 추가 (서비스 라인엔 Smithery 백링크 이미 추가됨, commit e377890)
