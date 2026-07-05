@@ -3,7 +3,7 @@
 
 import { webcrypto } from "node:crypto";
 
-const HMAC_KEY = "slyNiBEzW+Rwx9E0D0y7P3+zNOZfKi6ddDsKCo3MxdE=";
+const HMAC_KEY = "2575QbqHG0RbpVfu8lPCORDAohOlz4hTZkQ3a2pFGCg=";
 const BASE = "http://localhost:3000";
 const PATH = "/api/internal/mcp/my-routine";
 const REAL_USER = "cmisnvh080cyxmxlh86oy35a8"; // PERSONAL 23 routines, cap 20 트리거

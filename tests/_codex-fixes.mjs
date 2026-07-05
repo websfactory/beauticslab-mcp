@@ -4,8 +4,8 @@
 
 import { SignJWT, jwtVerify } from "jose";
 
-const SECRET = "oyogO02H99jxHWApOCDCXyJWreogPputl+LS2xsj87s=";
-const HMAC_KEY = "slyNiBEzW+Rwx9E0D0y7P3+zNOZfKi6ddDsKCo3MxdE=";
+const SECRET = "8DJRpPRGXOLtnmYB8rE5ALd6uZjDyFeUyEVlGveMrLk=";
+const HMAC_KEY = "2575QbqHG0RbpVfu8lPCORDAohOlz4hTZkQ3a2pFGCg=";
 const AUD = "https://mcp.beauticslab.com";
 const enc = new TextEncoder();
 

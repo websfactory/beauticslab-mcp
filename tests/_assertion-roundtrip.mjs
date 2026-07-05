@@ -9,7 +9,7 @@
 
 import { SignJWT, jwtVerify } from "jose";
 
-const SECRET_RAW = "oyogO02H99jxHWApOCDCXyJWreogPputl+LS2xsj87s=";
+const SECRET_RAW = "8DJRpPRGXOLtnmYB8rE5ALd6uZjDyFeUyEVlGveMrLk=";
 const AUD = "https://mcp.beauticslab.com";
 const enc = new TextEncoder();
 const secret = enc.encode(SECRET_RAW);
