@@ -1,4 +1,5 @@
 import OAuthProvider from "@cloudflare/workers-oauth-provider";
+import type { ClientRegistrationCallbackOptions, ClientRegistrationCallbackResult } from "@cloudflare/workers-oauth-provider";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpAgent } from "agents/mcp";
 import { registerTools } from "./tools/index.js";
@@ -39,6 +40,51 @@ export class BeauticsLabMCP extends McpAgent<Env, Record<string, never>, Props> 
   }
 }
 
+// loopback은 네이티브 MCP 클라이언트(데스크톱 앱·CLI)의 표준 redirect라 http를 허용해야 한다.
+// RFC 8252 §7.3.
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "[::1]", "localhost"]);
+
+// 등록 정책 훅 (v0.8.0~).
+// DCR 자체는 열어 둔다. 닫으면 Claude·ChatGPT 등 사전관계 없는 클라이언트가 붙지 못해
+// 원격 MCP 서버의 존재 이유가 사라진다(MCP 2026-07-28 client-registration 참조).
+// 대신 등록 단계에서 명백히 위험하거나 비정상인 메타데이터만 걷어낸다.
+function clientRegistrationCallback(
+  options: ClientRegistrationCallbackOptions,
+): ClientRegistrationCallbackResult | void {
+  const md = options.clientMetadata;
+
+  const name = md.client_name;
+  if (typeof name === "string" && name.length > 200) {
+    return { description: "client_name이 너무 깁니다 (최대 200자)." };
+  }
+
+  const uris = md.redirect_uris;
+  if (!Array.isArray(uris)) return; // 라이브러리가 필수 검증을 이미 수행한다.
+  if (uris.length > 10) {
+    return { description: "redirect_uris는 최대 10개까지 등록할 수 있습니다." };
+  }
+
+  for (const raw of uris) {
+    if (typeof raw !== "string") continue;
+    let u: URL;
+    try {
+      u = new URL(raw);
+    } catch {
+      return { description: `redirect_uri를 해석할 수 없습니다: ${raw}` };
+    }
+    // 평문 http로 인가코드를 돌려주면 경로상에서 코드가 노출된다. loopback만 예외.
+    if (u.protocol === "http:" && !LOOPBACK_HOSTS.has(u.hostname)) {
+      return {
+        description: "redirect_uri에 평문 http는 loopback(127.0.0.1, ::1, localhost)에만 허용됩니다.",
+      };
+    }
+    // 브라우저에서 스크립트로 실행되거나 인라인 문서로 열리는 스킴은 인가코드 전달에 쓸 수 없다.
+    if (u.protocol === "javascript:" || u.protocol === "data:" || u.protocol === "vbscript:") {
+      return { description: `허용되지 않는 redirect_uri 스킴입니다: ${u.protocol}` };
+    }
+  }
+}
+
 // OAuth + MCP entrypoint. Pattern: cloudflare/ai/demos/remote-mcp-github-oauth/src/index.ts.
 // See DESIGN.md 부록 C for reference log.
 export default new OAuthProvider({
@@ -46,8 +92,14 @@ export default new OAuthProvider({
   apiRoute: "/mcp",
   authorizeEndpoint: "/authorize",
   tokenEndpoint: "/token",
-  // DCR only for v1. CIMD deferred to v1.x. See DESIGN §10.7.
+  // DCR은 CIMD 미지원 클라이언트를 위한 하위호환으로 남긴다 (MCP 2026-07-28에서 deprecated).
   clientRegistrationEndpoint: "/register",
+  // CIMD: client_id가 클라이언트 소유 https 문서 URL이 되어 동의 화면에 검증된 도메인을 띄울 수 있다.
+  // 'global_fetch_strictly_public' 컴패트 플래그 필수 (wrangler.jsonc). 없으면 생성자가 throw한다.
+  clientIdMetadataDocumentEnabled: true,
+  // PKCE plain은 code_challenge를 그대로 노출해 보호 효과가 없다. S256만 허용.
+  allowPlainPKCE: false,
+  clientRegistrationCallback,
   defaultHandler: defaultHandler as any,
   scopesSupported: ["mcp:read"],
 });
