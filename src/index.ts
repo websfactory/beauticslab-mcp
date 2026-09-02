@@ -115,6 +115,12 @@ export default {
       // Cloudflare 가 채우는 헤더라 클라이언트가 위조할 수 없다.
       // 없을 때(로컬 dev 등)는 제한을 걸지 않는다 — 모든 요청이 한 키로 뭉쳐
       // 서로를 막는 것이 남용을 막는 것보다 해롭다.
+      //
+      // ★이 API 는 정확한 차단기가 아니다. 운영 실측(2026-09-02):
+      //   동시 50 x 200건 -> 153건 중 101건 차단 / 초당 1건 90초 -> 90건 중 62건 차단
+      //   그러나 최초 수십 건은 그대로 통과한다(카운터가 머신 로컬 캐시라 초기 undercount).
+      //   Cloudflare 문서도 "permissive, eventually consistent, 정확한 계수용 아님"이라 명시한다.
+      //   목적은 하드 캡이 아니라 지속적 남용의 감쇄다 — KV 하루 쓰기 한도를 지키는 것이 목표다.
       const ip = request.headers.get("cf-connecting-ip");
       if (ip) {
         const { success } = await env.REGISTER_LIMITER.limit({ key: ip });
