@@ -16,10 +16,12 @@
 | 10.1 | 동의 화면 위치 | Next.js `/oauth/mcp-bridge` (옵션 A) | active | DESIGN §10.1 |
 | 10.2 | search_product 4소스 통합 | 모두 검색 + `sources` 필터 (옵션 1) | active | DESIGN §10.2 |
 | 10.3 | Worker→Next.js 인증 | HMAC만 (mTLS는 v2) | active | DESIGN §10.3 |
-| 10.4 | 토큰 revoke UX | v1엔 안 만듦 | deferred → v2 | DESIGN §10.4 |
+| 10.4 | 토큰 revoke UX | v1엔 안 만듦 | superseded by 10.4b | DESIGN §10.4 |
+| 10.4b | 토큰 revoke UX | 구현: `/settings/connections` + Worker `/internal/grants/*` | active | 본 문서 §연결 해제·클라이언트 신원 |
 | 10.5 | 멀티 클라이언트 | workers-oauth-provider grant 분리로 자동 지원 | active | DESIGN §10.5 |
 | 10.6 | 로그·관측 | Cloudflare Logs + `mcp:tool:<name>` scope | active | DESIGN §10.6 |
-| 10.7 | 클라이언트 등록 | DCR만 (CIMD는 v1.x 검토) | active | DESIGN §10.7 |
+| 10.7 | 클라이언트 등록 | DCR만 (CIMD는 v1.x 검토) | superseded by 10.7b | DESIGN §10.7 |
+| 10.7b | 클라이언트 등록 | CIMD 활성 + DCR은 하위호환 유지 | active | 본 문서 §연결 해제·클라이언트 신원 |
 | ANOM | 익명 모드 | OAuth 단일 모드(폐기됨, 2026-05-10) | active | DESIGN §1, §3, §7 / research-dossier F6 회고 |
 
 ## 2. Tool 스펙 (tools-spec.md §4 — A~K)
@@ -36,7 +38,8 @@
 | H | canonical resource URI | ~~origin-only `https://mcp.beauticslab.com`~~ → **path-specific `https://mcp.beauticslab.com/mcp`** (2026-05-10 갱신) | active | DESIGN §8.4 |
 | I | 401 `WWW-Authenticate` | ~~`scope="mcp:read"` 포함 강제~~ → **라이브러리 default 형식 수용**, scope는 PRM `scopes_supported`로 게시 (2026-05-10 약화) | active | DESIGN §8.4 |
 | J | DCR-only 의도 표기 | v1 tradeoff로 명시 | active | DESIGN §10.7 |
-| K | consent CSRF/state 바인딩 | 명시 | active | DESIGN §3.1 |
+| K | consent CSRF/state 바인딩 | 명시 | superseded by K2 | DESIGN §3.1 |
+| K2 | consent CSRF/state 바인딩 | CSRF를 `worker_state`에 결합 + 클라이언트 신원 표시 | active | 본 문서 §연결 해제·클라이언트 신원 |
 
 ## 3. Next.js 통합 (nextjs-integration.md §9 — N1~N8, Codex 1차 리뷰 반영)
 
@@ -138,6 +141,80 @@
 - ubuntu-dev 위 Claude Code로 dogfooding 시 OAuth callback이 headless라 수동 URL 복사 필요
 - 일반 사용자(데스크탑 클라이언트)에겐 해당 없음
 - 메모리 reference 별도 보관: `ref_claude_code_remote_mcp_oauth.md`
+
+---
+
+## 연결 해제·클라이언트 신원 표시 (2026-09-02)
+
+**계기**: 외부 보안 연구자 신고(2026-08-27). "`/register`가 미인증이라 누구나 임의 `redirect_uri`로 클라이언트를 등록할 수 있고, 피해자를 유인하면 인가코드를 탈취할 수 있다."
+
+**사실 확인**: 등록이 열려 있는 것은 맞다. 다만 그것은 RFC 7591·MCP 규격이 의도한 동작이며, 신고자의 권고대로 등록에 사전토큰을 요구하면 사전관계가 없는 Claude·ChatGPT가 연결하지 못한다. 영향도 신고서의 "계정 탈취"가 아니라 `mcp:read` 범위의 읽기 전용 유출이다(도구 3종 모두 읽기 전용, 쓰기 경로 없음).
+
+**진짜 결함**: 동의 화면이 **어떤 클라이언트가 요청했는지 보여주지 않았다.** 열린 등록 자체가 아니라, 열린 등록 위에서 사용자에게 판단 근거를 주지 않은 것이 문제다.
+
+### 결정
+
+| ID | 결정 | 근거 |
+|---|---|---|
+| 10.7b | CIMD 활성(`clientIdMetadataDocumentEnabled`), DCR은 하위호환으로 유지 | MCP 2026-07-28에서 DCR은 deprecated, CIMD가 후속. CIMD는 `client_id`가 클라이언트 소유 https 문서 URL이라 동의 화면에 **검증된 도메인**을 띄울 수 있다 |
+| K2 | 동의 화면에 클라이언트 이름·인가코드 수신 주소를 표시하고, 신원 미검증(DCR·조회실패) 클라이언트에는 경고 | 사용자가 정상/공격자 클라이언트를 구별할 수 있어야 한다 |
+| K2 | 신원값은 Worker가 `INTERNAL_HMAC_KEY`로 서명한 `client_ctx` JWT로 전달(aud·exp·`state` 결합) | 쿼리 평문이면 공격자가 자기 `worker_state`에 남의 이름을 붙여 재조립할 수 있다 |
+| K2 | CSRF 토큰을 `worker_state`에 결합 | 종전 `HMAC(userId+5분창)`은 같은 사용자의 어떤 인가요청에도 통용돼, 승인이 "이 요청에 대한 승인"임을 보장하지 못했다 |
+| 10.4b | 연결 관리·해제 화면(`/settings/connections`) + Worker 내부 API `/internal/grants/list`·`/internal/grants/revoke` | 동의 화면이 약속한 해제 수단이 없었다. refresh token은 next-auth 세션과 분리돼 비밀번호 변경으로 끊기지 않는다 |
+| P1 | `/register` 등록 정책 훅: 평문 http는 loopback만, `redirect_uris` 최대 10개, `client_name` 최대 200자, `javascript:`/`data:`/`vbscript:` 거부 | 등록 자체는 열어 두되 명백히 위험한 메타데이터만 차단 |
+| P2 | `allowPlainPKCE: false` | plain은 `code_challenge`를 그대로 노출해 보호 효과가 없다 |
+
+### 설계 정정 — 신뢰의 축은 등록 방식이 아니라 수신 주소다 (2026-09-02, 같은 날)
+
+첫 구현은 **등록 방식(DCR/CIMD)** 을 신뢰 축으로 삼아 DCR 클라이언트 전부에 경고를 띄웠다. 운영 배포 후 실측하니 **Claude 가 DCR 로 등록한다**(`client_ctx` 의 `kind=dcr`). 즉 정상 사용자가 매번 경고를 보게 된다. 규격 문서를 다시 읽고 두 가지가 틀렸음을 확인했다.
+
+1. **CIMD ≠ 신뢰.** CIMD 는 "이 도메인이 이 프로그램을 자기 것이라 공개 선언했다"만 증명한다. 공격자도 자기 도메인에 CIMD 문서를 올릴 수 있다. 초록 배지로 "도메인 확인됨"을 띄운 것은 검증됨(verified)을 믿을 만함(trusted)으로 넘겨 읽게 만든다.
+2. **경고 피로.** 정상 로그인마다 경고가 뜨면 사용자는 경고를 읽지 않게 된다. 그러면 진짜 공격 때도 안 읽는다.
+
+**정정**: 신뢰 축을 **자격증명이 실제로 전달되는 곳(`redirect_uri` 호스트)** 으로 옮겼다. 공격자가 코드를 훔치려면 결국 자기가 통제하는 주소로 받아야 하므로 그 주소가 진짜 신호다. `beauticslab/src/lib/mcp/client-trust.ts` 가 판정을 전담한다.
+
+| 판정 | 조건 | 화면 |
+|---|---|---|
+| `known` | 수신 호스트가 알려진 1st-party 클라이언트와 **정확히 일치**(claude.ai·chatgpt.com·chat.openai.com) | 중립. 경고 없음 |
+| `loopback` | 수신 호스트가 127.0.0.1·::1·localhost | 추가 경고. **MCP 규격이 명시적으로 요구**한다 |
+| `unknown` | 그 외 전부 | 경고 + 수신 주소 확인 안내 |
+
+접미사 매칭은 쓰지 않는다(`claude.ai.evil.example` 이 통과한다). 디렉터리·검사 서비스(smithery·glama)는 목록에 넣지 않았다 — 사용자가 의도한 연결이 아닐 수 있다.
+
+CIMD 는 신뢰 판정에서 빠지고 **부가 정보**로 내려갔다. `client_id` 호스트를 "프로그램이 공개한 도메인"으로 표시하고(draft §6.4), 그 도메인과 수신 주소가 다르면 따로 알린다.
+
+**근거**
+- MCP 2026-07-28 `basic/authorization/security-considerations`: "**MUST** clearly display the redirect URI hostname during authorization" / "**SHOULD** display additional warnings for `localhost`-only redirect URIs" / "Client ID Metadata Documents cannot prevent `localhost` URL impersonation by themselves"
+- `draft-ietf-oauth-client-id-metadata-document-00` §6.4: `client_id` 호스트명을 표시할 것. fetch 실패 시 그 URL 이 유일한 단서다
+- 같은 draft §6.8 (Client ID Domain Trust): 인가서버는 **도메인 신뢰에 대해 자체 정책·휴리스틱을 둘 수 있다**. 신규 도메인에 추가 경고를 두는 예시가 명시돼 있다. 즉 호스트 기반 신뢰 정책은 규격이 열어 둔 길이다
+
+**검증**: `client-trust.ts` 판정 10케이스 통과(정상 Claude·ChatGPT·loopback 2종·신고자 클라이언트·접미사 위장·서브도메인 위장·CIMD 3종).
+
+**남은 개선안(미적용)**: draft §6.8 이 예시로 든 "이 클라이언트를 처음 승인하는 사용자에게 한 번 더 경고" 는 넣지 않았다. 사용자별 최초 승인 여부를 알아야 해서 grant 이력 조회가 필요하다. 필요해지면 별도 결정으로.
+
+### 라이브러리 갱신 0.5.0 → 0.10.3
+
+동반된 상위 동작 변화(우리 코드에 영향 있는 것만):
+- **0.9.0**: public client가 PKCE를 생략하면 인가요청을 거부. 실측 확인.
+- **0.10.0**: `parseAuthRequest()`가 `AuthorizationError`를 던진다. `redirectUri`는 클라이언트 검증을 통과한 경우에만 채워지므로, 채워졌을 때만 OAuth 에러 redirect하고 그 외는 로컬 렌더하도록 `handleAuthorize`를 고쳤다.
+- **0.9.1**: DCR 응답에서 `registration_client_uri` 제거(RFC 7592 미구현이라 잘못된 광고였다).
+- 메타데이터에 `authorization_response_iss_parameter_supported: true` 자동 추가(RFC 9207).
+
+`clientIdMetadataDocumentEnabled: true`는 `global_fetch_strictly_public` 컴패트 플래그를 요구한다(CIMD 문서 fetch가 우리 zone 내부로 되돌아오는 SSRF 방지). 없으면 `OAuthProvider` 생성자가 throw하므로 `wrangler.jsonc`에 함께 넣었다.
+
+### 검증 (2026-09-02, `wrangler dev --local`)
+
+- 메타데이터: `code_challenge_methods_supported: ["S256"]`, `client_id_metadata_document_supported: true`, `authorization_response_iss_parameter_supported: true`
+- 등록 정책: 비 loopback 평문 http 400 / loopback http 201 / `redirect_uris` 11개 400
+- PKCE 없는 public client 인가요청 → `error=invalid_request` + `iss` 포함 redirect
+- PKCE 포함 인가요청 → bridge redirect에 `client_ctx` 부착, JWT 검증 통과(`kind=dcr`, `state` 결합 일치)
+- 내부 API: 정상 서명 200 / 서명 훼손 401 / `grantId` 누락 400
+
+### 보류
+
+- **`/register` rate limit**: 등록 정책 훅에는 `env`가 주입되지 않아 KV 카운터를 쓸 수 없다. Cloudflare 대시보드의 Rate Limiting 규칙으로 거는 것이 맞다(설정 작업, 코드 아님).
+- **MCP 규격 2026-07-28 전송계층 이전**: 세션 제거·`initialize` 폐지·`server/discover` 신설 등 대규모 변경이나, 공식 TypeScript SDK 최신판(1.30.0)의 `LATEST_PROTOCOL_VERSION`이 아직 `2025-11-25`다. SDK가 구현할 때까지 보류한다. CIMD는 OAuth 계층이라 이 대기와 무관하게 먼저 적용했다.
+- **LICENSE 파일**: 외부 인덱스(M8ven)가 OSI 라이선스 파일을 권고하나, 결정 S3(Proprietary, All rights reserved)와 충돌한다. S3를 바꿀지는 별도 판단 사항.
 
 ---
 

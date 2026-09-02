@@ -414,6 +414,7 @@ beauticslab-mcp/
 ### 10.4 사용자 토큰 revoke UX
 - 사용자가 beauticslab.com에서 "AI 도구 연결 해제" 누르면?
 - v1엔 안 만듦. v2에서 Next.js → Worker로 KV 삭제 호출 API 추가
+- **갱신 (2026-09-02, 결정 10.4b)**: 구현했다. `/settings/connections` + Worker `/internal/grants/list`·`/internal/grants/revoke`. `docs/decisions.md` §연결 해제·클라이언트 신원 참조
 
 ### 10.5 멀티 클라이언트 (Claude Desktop + ChatGPT 동시 연결)
 - 한 사용자가 여러 MCP 클라이언트에서 동시 연결 시?
@@ -430,6 +431,7 @@ beauticslab-mcp/
 - `clientRegistrationEndpoint: "/register"`로 활성화 (workers-oauth-provider 0.5.0)
 - CIMD는 v1.x에서 추가 검토 (workers-oauth-provider 0.5.0의 CIMD 옵션 활성화 가능)
 - 근거 `docs/research-dossier.md` F4·F13
+- **갱신 (2026-09-02, 결정 10.7b)**: CIMD를 켰다. DCR은 하위호환으로 유지. MCP 2026-07-28에서 DCR은 deprecated. `docs/decisions.md` §연결 해제·클라이언트 신원 참조
 
 ---
 
