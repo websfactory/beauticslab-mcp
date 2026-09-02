@@ -164,6 +164,34 @@
 | P1 | `/register` 등록 정책 훅: 평문 http는 loopback만, `redirect_uris` 최대 10개, `client_name` 최대 200자, `javascript:`/`data:`/`vbscript:` 거부 | 등록 자체는 열어 두되 명백히 위험한 메타데이터만 차단 |
 | P2 | `allowPlainPKCE: false` | plain은 `code_challenge`를 그대로 노출해 보호 효과가 없다 |
 
+### 설계 정정 — 신뢰의 축은 등록 방식이 아니라 수신 주소다 (2026-09-02, 같은 날)
+
+첫 구현은 **등록 방식(DCR/CIMD)** 을 신뢰 축으로 삼아 DCR 클라이언트 전부에 경고를 띄웠다. 운영 배포 후 실측하니 **Claude 가 DCR 로 등록한다**(`client_ctx` 의 `kind=dcr`). 즉 정상 사용자가 매번 경고를 보게 된다. 규격 문서를 다시 읽고 두 가지가 틀렸음을 확인했다.
+
+1. **CIMD ≠ 신뢰.** CIMD 는 "이 도메인이 이 프로그램을 자기 것이라 공개 선언했다"만 증명한다. 공격자도 자기 도메인에 CIMD 문서를 올릴 수 있다. 초록 배지로 "도메인 확인됨"을 띄운 것은 검증됨(verified)을 믿을 만함(trusted)으로 넘겨 읽게 만든다.
+2. **경고 피로.** 정상 로그인마다 경고가 뜨면 사용자는 경고를 읽지 않게 된다. 그러면 진짜 공격 때도 안 읽는다.
+
+**정정**: 신뢰 축을 **자격증명이 실제로 전달되는 곳(`redirect_uri` 호스트)** 으로 옮겼다. 공격자가 코드를 훔치려면 결국 자기가 통제하는 주소로 받아야 하므로 그 주소가 진짜 신호다. `beauticslab/src/lib/mcp/client-trust.ts` 가 판정을 전담한다.
+
+| 판정 | 조건 | 화면 |
+|---|---|---|
+| `known` | 수신 호스트가 알려진 1st-party 클라이언트와 **정확히 일치**(claude.ai·chatgpt.com·chat.openai.com) | 중립. 경고 없음 |
+| `loopback` | 수신 호스트가 127.0.0.1·::1·localhost | 추가 경고. **MCP 규격이 명시적으로 요구**한다 |
+| `unknown` | 그 외 전부 | 경고 + 수신 주소 확인 안내 |
+
+접미사 매칭은 쓰지 않는다(`claude.ai.evil.example` 이 통과한다). 디렉터리·검사 서비스(smithery·glama)는 목록에 넣지 않았다 — 사용자가 의도한 연결이 아닐 수 있다.
+
+CIMD 는 신뢰 판정에서 빠지고 **부가 정보**로 내려갔다. `client_id` 호스트를 "프로그램이 공개한 도메인"으로 표시하고(draft §6.4), 그 도메인과 수신 주소가 다르면 따로 알린다.
+
+**근거**
+- MCP 2026-07-28 `basic/authorization/security-considerations`: "**MUST** clearly display the redirect URI hostname during authorization" / "**SHOULD** display additional warnings for `localhost`-only redirect URIs" / "Client ID Metadata Documents cannot prevent `localhost` URL impersonation by themselves"
+- `draft-ietf-oauth-client-id-metadata-document-00` §6.4: `client_id` 호스트명을 표시할 것. fetch 실패 시 그 URL 이 유일한 단서다
+- 같은 draft §6.8 (Client ID Domain Trust): 인가서버는 **도메인 신뢰에 대해 자체 정책·휴리스틱을 둘 수 있다**. 신규 도메인에 추가 경고를 두는 예시가 명시돼 있다. 즉 호스트 기반 신뢰 정책은 규격이 열어 둔 길이다
+
+**검증**: `client-trust.ts` 판정 10케이스 통과(정상 Claude·ChatGPT·loopback 2종·신고자 클라이언트·접미사 위장·서브도메인 위장·CIMD 3종).
+
+**남은 개선안(미적용)**: draft §6.8 이 예시로 든 "이 클라이언트를 처음 승인하는 사용자에게 한 번 더 경고" 는 넣지 않았다. 사용자별 최초 승인 여부를 알아야 해서 grant 이력 조회가 필요하다. 필요해지면 별도 결정으로.
+
 ### 라이브러리 갱신 0.5.0 → 0.10.3
 
 동반된 상위 동작 변화(우리 코드에 영향 있는 것만):
