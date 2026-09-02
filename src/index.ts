@@ -16,6 +16,8 @@ export type Props = {
 export type Env = {
   OAUTH_KV: KVNamespace;
   MCP_OBJECT: DurableObjectNamespace;
+  // /register 요청량 제한 (wrangler.jsonc 의 ratelimits 바인딩).
+  REGISTER_LIMITER: RateLimit;
   ASSERTION_VERIFY_KEY: string;
   INTERNAL_HMAC_KEY: string;
   NEXTJS_INTERNAL_BASE_URL: string;
@@ -87,7 +89,7 @@ function clientRegistrationCallback(
 
 // OAuth + MCP entrypoint. Pattern: cloudflare/ai/demos/remote-mcp-github-oauth/src/index.ts.
 // See DESIGN.md 부록 C for reference log.
-export default new OAuthProvider({
+const provider = new OAuthProvider({
   apiHandler: BeauticsLabMCP.serve("/mcp") as any,
   apiRoute: "/mcp",
   authorizeEndpoint: "/authorize",
@@ -103,3 +105,37 @@ export default new OAuthProvider({
   defaultHandler: defaultHandler as any,
   scopesSupported: ["mcp:read"],
 });
+
+// 등록 요청량 제한을 provider 앞단에서 건다.
+// clientRegistrationCallback 에는 env 가 주입되지 않아 바인딩을 쓸 수 없다.
+// provider.fetch 는 공개 메서드이므로 한 겹 감싸는 쪽이 유일하고 단순한 방법이다.
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    if (new URL(request.url).pathname === "/register") {
+      // Cloudflare 가 채우는 헤더라 클라이언트가 위조할 수 없다.
+      // 없을 때(로컬 dev 등)는 제한을 걸지 않는다 — 모든 요청이 한 키로 뭉쳐
+      // 서로를 막는 것이 남용을 막는 것보다 해롭다.
+      const ip = request.headers.get("cf-connecting-ip");
+      if (ip) {
+        const { success } = await env.REGISTER_LIMITER.limit({ key: ip });
+        if (!success) {
+          return new Response(
+            JSON.stringify({
+              error: "temporarily_unavailable",
+              error_description: "등록 요청이 너무 잦습니다. 잠시 후 다시 시도해주세요.",
+            }),
+            {
+              status: 429,
+              headers: {
+                "content-type": "application/json",
+                "cache-control": "no-store",
+                "retry-after": "60",
+              },
+            },
+          );
+        }
+      }
+    }
+    return provider.fetch(request, env, ctx);
+  },
+};

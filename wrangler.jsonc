@@ -32,6 +32,18 @@
       }
     ]
   },
+  // /register 남용 방지. Cloudflare Workers Rate Limiting API.
+  // period 는 10 또는 60 만 허용된다. 실사용이 월 13건 수준이라 20건/분이면
+  // 정상 클라이언트는 절대 닿지 않고, 스크립트 한 대가 KV 하루 쓰기 한도(무료 1,000건)를
+  // 소진시켜 서비스를 먹통으로 만드는 것만 막는다.
+  // ★카운터는 Cloudflare 지역별로 따로 집계된다(문서 명시). 분산 공격은 막지 못한다.
+  "ratelimits": [
+    {
+      "name": "REGISTER_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 20, "period": 60 }
+    }
+  ],
   "kv_namespaces": [
     {
       "binding": "OAUTH_KV",
